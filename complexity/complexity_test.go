@@ -12,7 +12,14 @@ func TestComplexity(t *testing.T) {
 		name       string
 		code       string
 		complexity int
-	}{}
+	}{{
+		name: "simple function",
+		code: `package main
+func Double(n int) {
+	return n * 2
+}`,
+		complexity: 1,
+	}}
 
 	for _, testcase := range testcases {
 		t.Run(testcase.name, func(t *testing.T) {
