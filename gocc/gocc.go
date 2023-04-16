@@ -9,7 +9,7 @@ import (
 	"golang.org/x/tools/go/ast/inspector"
 )
 
-var Analyzer = analysis.Analyzer{
+var Analyzer = &analysis.Analyzer{
 	Name:     "gocc",
 	Doc:      "checks cyclomatic complexity",
 	Run:      run,
