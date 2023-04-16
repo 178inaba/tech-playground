@@ -24,6 +24,10 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 	inspect.Preorder(nodeFilter, func(n ast.Node) {
 		count := complexity.Count(n)
+		if count >= 10 {
+			fd := n.(*ast.FuncDecl)
+			pass.Reportf(n.Pos(), "function %s complexity=%d", fd.Name.Name, count)
+		}
 	})
 
 	return nil, nil
