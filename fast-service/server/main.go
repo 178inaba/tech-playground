@@ -1,16 +1,45 @@
 package main
 
 import (
+	"context"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 )
 
 const maxSize = 26214400 // 25MB
 
 func main() {
+	ctx := context.Background()
+	idleConnsClosed := make(chan struct{})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/download", downloadHandler())
+	mux.HandleFunc("/upload", uploadHandler())
+	srv := http.Server{
+		Handler: mux,
+	}
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("HTTP server Shutdown: %v.", err)
+		}
+		close(idleConnsClosed)
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("HTTP server ListenAndServe: %v.", err)
+	}
+
+	<-idleConnsClosed
 }
 
 func downloadHandler() http.HandlerFunc {
