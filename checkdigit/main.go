@@ -57,6 +57,17 @@ func (l luhn) Generate(seed string) (int, error) {
 	return sum * 9 % 10, nil
 }
 
+type gtin struct {
+	digit   int
+	posCorr bool
+}
+
+// Verify implements checkdigit.Verifier interface.
+func (g *gtin) Verify(code string) bool {
+	// TODO
+	return false
+}
+
 // ErrInvalidArgument is happening when given the wrong argument.
 var ErrInvalidArgument = errors.New("checkdigit: invalid argument")
 
