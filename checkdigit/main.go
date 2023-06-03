@@ -101,6 +101,14 @@ func (g *gtin) Generate(seed string) (int, error) {
 	return d, nil
 }
 
+// NewJAN13 returns a new Provider that implemented GTIN-13 with position correction calculator.
+func NewJAN13() Provider {
+	return &gtin{
+		digit:   13,
+		posCorr: true,
+	}
+}
+
 // ErrInvalidArgument is happening when given the wrong argument.
 var ErrInvalidArgument = errors.New("checkdigit: invalid argument")
 
