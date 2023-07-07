@@ -1,6 +1,12 @@
 package miro
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+import (
+	"context"
+
+	"github.com/Miro-Ecosystem/go-miro/miro"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
 
 func Provider() *schema.Provider {
 	return &schema.Provider{
@@ -12,7 +18,14 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 			},
 		},
-		ResourcesMap:   map[string]*schema.Resource{},
-		DataSourcesMap: map[string]*schema.Resource{},
+		ResourcesMap:         map[string]*schema.Resource{},
+		DataSourcesMap:       map[string]*schema.Resource{},
+		ConfigureContextFunc: providerConfigureFunc,
 	}
+}
+
+func providerConfigureFunc(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	key := data.Get("access_token").(string)
+	var diags diag.Diagnostics
+	return miro.NewClient(key), diags
 }
