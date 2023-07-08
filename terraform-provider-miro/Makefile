@@ -7,3 +7,6 @@ install-macos:
 	@go build -o terraform-provider-miro_99.0.0
 	@mkdir -p ~/Library/Application\ Support/io.terraform/plugins/$(provider_macos_path)
 	@mv terraform-provider-miro_99.0.0 ~/Library/Application\ Support/io.terraform/plugins/$(provider_macos_path)
+
+clean:
+	@rm -rf ~/Library/Application\ Support/io.terraform
