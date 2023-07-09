@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-    miro     = {
+    miro = {
       source = "178inaba/miro"
     }
   }
@@ -8,4 +8,9 @@ terraform {
 
 provider "miro" {
   access_token = var.access_token
+}
+
+resource "miro_board" "test" {
+  name        = "Test Board"
+  description = "My test board for Software Design"
 }
