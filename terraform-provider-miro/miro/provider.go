@@ -18,7 +18,9 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 			},
 		},
-		ResourcesMap:         map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"miro_board": resourceBoard(),
+		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigureFunc,
 	}
