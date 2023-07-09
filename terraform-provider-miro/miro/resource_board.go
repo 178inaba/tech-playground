@@ -47,6 +47,23 @@ func resourceBoardCreate(ctx context.Context, data *schema.ResourceData, meta in
 }
 
 func resourceBoardRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// TODO
-	return nil
+	c := meta.(*miro.Client)
+
+	var diags diag.Diagnostics
+	board, err := c.Boards.Get(ctx, data.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if board == nil {
+		data.SetId("")
+		return diags
+	}
+
+	if err := data.Set("boards", board); err != nil {
+		return diag.FromErr(err)
+	}
+
+	data.SetId(board.ID)
+	return diags
 }
