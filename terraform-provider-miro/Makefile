@@ -10,3 +10,4 @@ install-macos:
 
 clean:
 	@rm -rf ~/Library/Application\ Support/io.terraform
+	@rm -rf terraform/.terraform terraform/.terraform.lock.hcl
