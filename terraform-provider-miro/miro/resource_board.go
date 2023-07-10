@@ -23,6 +23,9 @@ func resourceBoard() *schema.Resource {
 			},
 		},
 		CreateContext: resourceBoardCreate,
+		ReadContext:   resourceBoardRead,
+		UpdateContext: resourceBoardUpdate,
+		DeleteContext: resourceBoardDelete,
 	}
 }
 
@@ -66,4 +69,14 @@ func resourceBoardRead(ctx context.Context, data *schema.ResourceData, meta inte
 
 	data.SetId(board.ID)
 	return diags
+}
+
+func resourceBoardUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// TODO
+	return nil
+}
+
+func resourceBoardDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// TODO
+	return nil
 }
