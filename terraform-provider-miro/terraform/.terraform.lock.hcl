@@ -4,6 +4,6 @@
 provider "registry.terraform.io/178inaba/miro" {
   version = "99.0.0"
   hashes = [
-    "h1:Kt62+J/HBB/LYQ5PBpKsQwTLTEimVTFEtp59IgUBdvE=",
+    "h1:pWf+EgeEZFKVMNQ7baTXR1aY4DyiOIvNmddWIQGe8Vw=",
   ]
 }

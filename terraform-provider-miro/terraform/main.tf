@@ -6,6 +6,11 @@ terraform {
   }
 }
 
+variable "access_token" {
+  type      = string
+  sensitive = true
+}
+
 provider "miro" {
   access_token = var.access_token
 }
