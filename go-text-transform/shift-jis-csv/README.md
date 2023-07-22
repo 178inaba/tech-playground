@@ -3,5 +3,5 @@
 ## Usage
 
 ```console
-$ $ go run main.go shift_jis.csv
+$ go run main.go shift_jis.csv
 ```
