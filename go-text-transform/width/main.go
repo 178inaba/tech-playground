@@ -7,8 +7,10 @@ import (
 )
 
 func main() {
-	fmt.Println("p.Wide(), p.Narrow(), p.Folded(), p.Kind() ------------------------------------------------------------")
+	// 全角の５、半角のｱ、全角のア、半角のA、ギリシア文字のアルファ
 	rs := []rune{'５', 'ｱ', 'ア', 'A', 'α'}
+
+	fmt.Println("p.Wide(), p.Narrow(), p.Folded(), p.Kind() ------------------------------------------------------------")
 	fmt.Println("rune\tWide\tNarrow\tFolded\tKind")
 	fmt.Println("--------------------------------------------------")
 	for _, r := range rs {
