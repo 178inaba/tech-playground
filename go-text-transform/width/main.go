@@ -15,4 +15,9 @@ func main() {
 		w, n, f, k := p.Wide(), p.Narrow(), p.Folded(), p.Kind()
 		fmt.Printf("%2c\t%2c\t%3c\t%3c\t%s\n", r, w, n, f, k)
 	}
+
+	for _, r := range width.Fold.String("５ｱアAα") {
+		p := width.LookupRune(r)
+		fmt.Printf("%c: %s\n", r, p.Kind())
+	}
 }
