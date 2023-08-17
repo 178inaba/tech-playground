@@ -1,4 +1,4 @@
-module github.com/178inaba/tech-playground/go-text-transform/shift-jis
+module github.com/178inaba/tech-playground/go-text-transform/shift-jis-csv
 
 go 1.20
 
