@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/rivo/uniseg"
+	"golang.org/x/text/runes"
 	"golang.org/x/text/unicode/norm"
+	"golang.org/x/text/width"
 )
 
 func main() {
@@ -44,7 +47,7 @@ func main() {
 	s1 = norm.NFC.String(s1)
 	fmt.Printf("%[1]q %+[1]q\n", s1)
 
-	fmt.Println("\n互換等価性に基づいて分解・合成 --------------------------------------------------")
+	fmt.Println("互換等価性に基づいて分解・合成 --------------------------------------------------")
 	s2 := "ゴ"
 	fmt.Printf("%[1]q %+[1]q\n", s2)
 
@@ -55,4 +58,10 @@ func main() {
 	// 合成
 	s2 = norm.NFKC.String(s2)
 	fmt.Printf("%[1]q %+[1]q\n", s2)
+
+	fmt.Println("コードポイントごとの変換 --------------------------------------------------")
+
+	// カタカナであれば全角にする
+	t := runes.If(runes.In(unicode.Katakana), width.Widen, nil)
+	fmt.Println(t.String("５ｱアAα"))
 }
