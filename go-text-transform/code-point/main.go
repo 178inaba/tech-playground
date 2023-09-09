@@ -2,11 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/rivo/uniseg"
 	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 	"golang.org/x/text/width"
 )
@@ -62,6 +64,15 @@ func main() {
 	fmt.Println("コードポイントごとの変換 --------------------------------------------------")
 
 	// カタカナであれば全角にする
-	t := runes.If(runes.In(unicode.Katakana), width.Widen, nil)
-	fmt.Println(t.String("５ｱアAα"))
+	t1 := runes.If(runes.In(unicode.Katakana), width.Widen, nil)
+	fmt.Println(t1.String("５ｱアAα"))
+
+	fmt.Println("アクサンテギュなどを削除 --------------------------------------------------")
+	removeMn := runes.Remove(runes.In(unicode.Mn))
+	t2 := transform.Chain(norm.NFD, removeMn, norm.NFC)
+	s3, _, err := transform.String(t2, "résumé")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(s3)
 }
