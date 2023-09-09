@@ -75,4 +75,13 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(s3)
+
+	fmt.Println("アルファベットを大文字に変換 --------------------------------------------------")
+	t3 := runes.Map(func(r rune) rune {
+		if 'a' <= r && r <= 'z' {
+			return r - 'a' + 'A'
+		}
+		return r
+	})
+	fmt.Println(t3.String("Hello, World"))
 }
