@@ -18,14 +18,14 @@ type Replacer struct {
 
 func (r *Replacer) Transform(dst, src []byte, atEOF bool) (int, int, error) {
 	// srcの前方にpreSrcを付加する。
-	_src := src
+	newSrc := src
 	if len(r.preSrc) > 0 {
-		_src = make([]byte, len(r.preSrc)+len(src))
-		copy(_src, r.preSrc)
-		copy(_src[len(r.preSrc):], src)
+		newSrc = make([]byte, len(r.preSrc)+len(src))
+		copy(newSrc, r.preSrc)
+		copy(newSrc[len(r.preSrc):], src)
 	}
 
-	nDst, nSrc, preSrc, err := r.transform(dst, _src, atEOF)
+	nDst, nSrc, preSrc, err := r.transform(dst, newSrc, atEOF)
 
 	// 読み込んだ長さより退避していた長さが長い場合。
 	if nSrc < len(r.preSrc) {
