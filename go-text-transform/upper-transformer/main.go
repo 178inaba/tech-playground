@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"io"
+	"log"
 	"os"
 	"strings"
 
@@ -39,5 +41,12 @@ func (Upper) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) 
 func main() {
 	var t Upper
 	w := transform.NewWriter(os.Stdout, t)
-	io.Copy(w, strings.NewReader("Hello, World"))
+
+	flag.Parse()
+	args := flag.Args()
+	if len(args) == 0 {
+		log.Fatal("Source strings is not set.")
+	}
+
+	io.Copy(w, strings.NewReader(args[0]+"\n"))
 }
