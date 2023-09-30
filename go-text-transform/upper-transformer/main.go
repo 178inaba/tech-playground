@@ -1,6 +1,12 @@
 package main
 
-import "golang.org/x/text/transform"
+import (
+	"io"
+	"os"
+	"strings"
+
+	"golang.org/x/text/transform"
+)
 
 type Upper struct{ transform.NopResetter }
 
@@ -31,4 +37,7 @@ func (Upper) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) 
 }
 
 func main() {
+	var t Upper
+	w := transform.NewWriter(os.Stdout, t)
+	io.Copy(w, strings.NewReader("Hello, World"))
 }
