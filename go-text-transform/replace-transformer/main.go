@@ -40,7 +40,17 @@ func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err e
 
 		// 見つからなかった場合。
 		if i == -1 {
-			// TODO
+			n := len(src[nSrc:])
+			m := copy(dst[nDst:], src[nSrc:nSrc+n])
+			nDst += m
+			nSrc += m
+
+			// 全部書き込めなかった場合
+			if m < n {
+				err = transform.ErrShortDst
+				return
+			}
+
 			return
 		}
 
