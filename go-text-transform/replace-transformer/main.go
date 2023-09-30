@@ -2,6 +2,11 @@ package main
 
 import (
 	"bytes"
+	"flag"
+	"io"
+	"log"
+	"os"
+	"strings"
 
 	"golang.org/x/text/transform"
 )
@@ -14,6 +19,10 @@ type Replacer struct {
 
 	// 前回余ったold分。
 	preSrc []byte
+}
+
+func NewReplacer(old, new []byte) *Replacer {
+	return &Replacer{old: old, new: new}
 }
 
 func (r *Replacer) Transform(dst, src []byte, atEOF bool) (int, int, error) {
@@ -150,4 +159,14 @@ func overlapWidth(a, b []byte) int {
 }
 
 func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) < 3 {
+		log.Fatal("Args is not set.")
+	}
+
+	t := NewReplacer([]byte(args[0]), []byte(args[1]))
+	w := transform.NewWriter(os.Stdout, t)
+
+	io.Copy(w, strings.NewReader(args[2]+"\n"))
 }
