@@ -7,11 +7,25 @@ import (
 )
 
 type Replacer struct {
-	transform.NopResetter
 	old, new []byte
+	// 前回書き込めなかった分。
+	preDst []byte
 }
 
 func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
+	// 前回書き込めなかった分を書き込む。
+	if len(r.preDst) > 0 {
+		n := copy(dst, r.preDst)
+		nDst += n
+		r.preDst = r.preDst[n:]
+
+		// それでもまだ足りない場合。
+		if len(r.preDst) > 0 {
+			err = transform.ErrShortDst
+			return
+		}
+	}
+
 	// r.oldが空であれば、そのままコピー。
 	if len(r.old) == 0 {
 		n := copy(dst[nDst:], src)
@@ -43,7 +57,18 @@ func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err e
 		n = copy(dst[nDst:], r.new)
 		nDst += n
 		nSrc += len(r.old)
+
+		// r.newが長くてdstが足りない場合は次回に持ち越し。
+		if n < len(r.new) {
+			r.preDst = r.new[n:]
+			err = transform.ErrShortDst
+			return
+		}
 	}
+}
+
+func (r *Replacer) Reset() {
+	r.preDst = nil
 }
 
 func main() {
