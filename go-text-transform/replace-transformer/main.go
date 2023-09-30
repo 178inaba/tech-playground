@@ -8,11 +8,39 @@ import (
 
 type Replacer struct {
 	old, new []byte
+
 	// 前回書き込めなかった分。
 	preDst []byte
+
+	// 前回余ったold分。
+	preSrc []byte
 }
 
-func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err error) {
+func (r *Replacer) Transform(dst, src []byte, atEOF bool) (int, int, error) {
+	// srcの前方にpreSrcを付加する。
+	_src := src
+	if len(r.preSrc) > 0 {
+		_src = make([]byte, len(r.preSrc)+len(src))
+		copy(_src, r.preSrc)
+		copy(_src[len(r.preSrc):], src)
+	}
+
+	nDst, nSrc, preSrc, err := r.transform(dst, _src, atEOF)
+
+	// 読み込んだ長さより退避していた長さが長い場合。
+	if nSrc < len(r.preSrc) {
+		r.preSrc = r.preSrc[nSrc:]
+		nSrc = 0
+	} else {
+		nSrc -= len(r.preSrc)
+
+		// 新しく退避させる。
+		r.preSrc = preSrc
+	}
+
+	return nDst, nSrc, err
+}
+func (r *Replacer) transform(dst, src []byte, atEOF bool) (nDst, nSrc int, preSrc []byte, err error) {
 	// 前回書き込めなかった分を書き込む。
 	if len(r.preDst) > 0 {
 		n := copy(dst, r.preDst)
@@ -41,6 +69,19 @@ func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err e
 		// 見つからなかった場合。
 		if i == -1 {
 			n := len(src[nSrc:])
+
+			// srcの末尾がr.oldの前方部分で終わる場合。
+			var w int
+			if !atEOF { // まだ次で読み込める余地がある。
+				// srcの末尾とr.oldが同じ分の長さ。
+				w = overlapWidth(src[nSrc:], r.old)
+				if w > 0 {
+					// コピーする分から一旦除外しておく。
+					n -= w
+					err = transform.ErrShortSrc
+				}
+			}
+
 			m := copy(dst[nDst:], src[nSrc:nSrc+n])
 			nDst += m
 			nSrc += m
@@ -50,6 +91,12 @@ func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err e
 				err = transform.ErrShortDst
 				return
 			}
+
+			// 次のsrcの先頭に追加しておく。
+			preSrc = r.old[:w]
+
+			// 読み込んだことにする。
+			nSrc += w
 
 			return
 		}
@@ -79,6 +126,27 @@ func (r *Replacer) Transform(dst, src []byte, atEOF bool) (nDst, nSrc int, err e
 
 func (r *Replacer) Reset() {
 	r.preDst = nil
+	r.preSrc = nil
+}
+
+// aの末尾とbの先頭がマッチする長さ。
+// 例: a:[0, 1, 2], b:[1, 2] -> 2
+func overlapWidth(a, b []byte) int {
+	// aとbで短い方の長さ。
+	w := len(a)
+	if w > len(b) {
+		w = len(b)
+	}
+
+	// wを短くしながらマッチするまで。
+	for ; w > 0; w-- {
+		if bytes.Equal(a[len(a)-w:], b[:w]) {
+			return w
+		}
+	}
+
+	// まったくマッチしなかった。
+	return 0
 }
 
 func main() {
