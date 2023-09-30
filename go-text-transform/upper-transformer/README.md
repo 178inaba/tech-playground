@@ -4,6 +4,7 @@
 
 ```console
 $ go run main.go 'Hello, World'
+HELLO, WORLD
 ```
 
 ## Source
