@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
+	"syscall/js"
 	"time"
 )
 
 func main() {
+	// TODO
 }
 
 func Compress(src io.Reader) (io.Reader, error) {
@@ -25,4 +27,9 @@ func Compress(src io.Reader) (io.Reader, error) {
 	}
 
 	return &buf, nil
+}
+
+func newUint8Array(size int) js.Value {
+	ua := js.Global().Get("Uint8Array")
+	return ua.New(size)
 }
