@@ -1,4 +1,4 @@
-# Go Wasm
+# Hello Wasm
 
 ## Requirement
 
