@@ -1,0 +1,13 @@
+<script src="./wasm_exec.js"></script>
+<script>
+  (async () => {
+    const go = new Go();
+    // WebAssemblyをコンパイルしてインスタンス化する。
+    const { instance } = await WebAssembly.instantiateStreaming(
+      fetch('main.wasm'),
+      go.importObject
+    );
+    // インスタンス化したWebAssemblyを実行する。
+    await go.run(instance);
+  })();
+</script>
