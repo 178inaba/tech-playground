@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	// TODO
+	js.Global().Set("compress", compressFunc)
+	select {}
 }
 
 func Compress(src io.Reader) (io.Reader, error) {
