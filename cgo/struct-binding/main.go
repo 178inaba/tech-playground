@@ -21,15 +21,25 @@ void person_say(person_t *p) {
 }
 */
 import "C"
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type Person struct {
 	c *C.person_t
 }
 
+func personFinalizer(p interface{}) {
+	C.free(unsafe.Pointer(p.(*Person).c))
+}
+
 func NewPerson(age int, name string) *Person {
 	c := C.new_person(C.int(age), C.CString(name))
-	return &Person{c: c}
+	p := Person{c: c}
+	// pが解放される際にpersonFinalizerを呼び出す。
+	runtime.SetFinalizer(&p, personFinalizer)
+	return &p
 }
 
 func (p *Person) Name() string {
@@ -44,13 +54,8 @@ func (p *Person) Say() {
 	C.person_say(p.c)
 }
 
-func (p *Person) Release() {
-	C.free(unsafe.Pointer(p.c))
-}
-
 func main() {
 	p := NewPerson(10, "bob")
-	defer p.Release() // 使う側で明示的に呼び出す。
 
 	// 直接Cのnameを書き換える。
 	p.SetName("alice")
