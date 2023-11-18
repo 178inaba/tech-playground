@@ -23,18 +23,20 @@ void person_say(person_t *p) {
 import "C"
 
 type Person struct {
-	Age  int
-	Name string
-	c    *C.person_t
+	c *C.person_t
 }
 
 func NewPerson(age int, name string) *Person {
 	c := C.new_person(C.int(age), C.CString(name))
-	return &Person{
-		Age:  int(c.age),
-		Name: C.GoString(c.name),
-		c:    c,
-	}
+	return &Person{c: c}
+}
+
+func (p *Person) Name() string {
+	return C.GoString(p.c.name)
+}
+
+func (p *Person) SetName(name string) {
+	p.c.name = C.CString(name)
 }
 
 func (p *Person) Say() {
@@ -43,7 +45,7 @@ func (p *Person) Say() {
 
 func main() {
 	p := NewPerson(10, "bob")
-	// *C.person_tのnameは書き換わらない。
-	p.Name = "alice"
+	// 直接Cのnameを書き換える。
+	p.SetName("alice")
 	p.Say()
 }
