@@ -21,6 +21,7 @@ void person_say(person_t *p) {
 }
 */
 import "C"
+import "unsafe"
 
 type Person struct {
 	c *C.person_t
@@ -43,8 +44,14 @@ func (p *Person) Say() {
 	C.person_say(p.c)
 }
 
+func (p *Person) Release() {
+	C.free(unsafe.Pointer(p.c))
+}
+
 func main() {
 	p := NewPerson(10, "bob")
+	defer p.Release() // 使う側で明示的に呼び出す。
+
 	// 直接Cのnameを書き換える。
 	p.SetName("alice")
 	p.Say()
