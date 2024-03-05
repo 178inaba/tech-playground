@@ -20,7 +20,7 @@ func main() {
 	api := slack.New(os.Getenv("SLACK_TOKEN"))
 	groups, err := api.GetUserGroupsContext(context.Background(), slack.GetUserGroupsOptionIncludeUsers(true))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Get user groups: %v.", err)
 	}
 
 	for _, g := range groups {
