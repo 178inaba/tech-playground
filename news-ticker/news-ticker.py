@@ -5,7 +5,30 @@ import time
 import json
 import subprocess
 import unicodedata
+import random
 from datetime import datetime
+
+# ニュースソース設定
+NEWS_SOURCES = [
+    {
+        "name": "NHK",
+        "rss_url": "https://www3.nhk.or.jp/rss/news/cat0.xml",
+        "max_items": 8
+    },
+    {
+        "name": "お笑いナタリー",
+        "rss_url": "https://natalie.mu/owarai/feed/news",
+        "max_items": 5
+    },
+    {
+        "name": "時事通信",
+        "rss_url": "https://www.jiji.com/rss/ranking.rdf",
+        "max_items": 5
+    }
+]
+
+# 表示モード設定
+DISPLAY_MODE_RANDOM = True  # True: ランダム表示, False: 順次表示
 
 # 端末サイズ取得
 try:
@@ -36,12 +59,12 @@ def substr_by_width(s, offset, width):
 def display_width(s):
     return sum(char_width(ch) for ch in s)
 
-# ニュース取得
-def fetch_news():
+# 単一ソースからニュース取得
+def fetch_news_from_source(source):
     try:
         cmd = [
             "curl", "-s",
-            "https://api.rss2json.com/v1/api.json?rss_url=https://www3.nhk.or.jp/rss/news/cat0.xml"
+            f"https://api.rss2json.com/v1/api.json?rss_url={source['rss_url']}"
         ]
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
@@ -50,20 +73,62 @@ def fetch_news():
             if data.get("status") == "ok":
                 items = data.get("items", [])
                 news_list = []
-                for item in items[:8]:  # 最新8件
+                for item in items[:source['max_items']]:
                     title = item.get("title", "")
                     if title:
-                        news_list.append(f"■ {title}")
+                        # ソース名を末尾に追加
+                        formatted_news = f"■ {title} ({source['name']})"
+                        news_list.append(formatted_news)
                 return news_list
     except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
         pass
 
-    return ["■ ニュースの取得に失敗しました", "■ インターネット接続を確認してください"]
+    return []
+
+# 全ソースからニュース取得
+def fetch_all_news():
+    all_news = []
+    failed_sources = []
+
+    for source in NEWS_SOURCES:
+        print(f"\033[4;0H\033[K🔄 {source['name']}からニュースを取得中...", end="")
+        sys.stdout.flush()
+
+        news_from_source = fetch_news_from_source(source)
+        if news_from_source:
+            all_news.extend(news_from_source)
+        else:
+            failed_sources.append(source['name'])
+
+        time.sleep(0.5)  # ソース間で少し待機
+
+    # 取得に失敗したソースがある場合の通知
+    if failed_sources:
+        failed_msg = f"■ 取得失敗: {', '.join(failed_sources)}"
+        all_news.append(failed_msg)
+
+    # 何も取得できなかった場合
+    if not all_news:
+        return ["■ ニュースの取得に失敗しました", "■ インターネット接続を確認してください"]
+
+    # 表示モードに応じてソート
+    if DISPLAY_MODE_RANDOM:
+        # ランダム表示（取得失敗メッセージは最後に固定）
+        error_messages = [msg for msg in all_news if "取得失敗" in msg]
+        news_messages = [msg for msg in all_news if "取得失敗" not in msg]
+        random.shuffle(news_messages)
+        all_news = news_messages + error_messages
+
+    return all_news
 
 # 読み上げ機能
 def speak_text(text):
     try:
+        # ソース名部分を除去してから読み上げ
         clean_text = text.replace("■ ", "")
+        # (ソース名) の部分を除去
+        import re
+        clean_text = re.sub(r'\s*\([^)]+\)\s*$', '', clean_text)
         subprocess.Popen(["say", clean_text, "-v", "Kyoko", "-r", "160"])
     except Exception:
         pass  # 読み上げ失敗時は無視
@@ -107,6 +172,8 @@ def generate_header():
     print()
     print("🔄 永続的にニュースを取得・表示・読み上げします")
     print("⏱️  5分間隔で新しいニュースを取得")
+    print(f"📺 対応ソース: {', '.join([source['name'] for source in NEWS_SOURCES])}")
+    print(f"🎲 表示モード: {'ランダム' if DISPLAY_MODE_RANDOM else '順次'}")
     print("🎯 Ctrl+C で終了")
     print()
 
@@ -130,7 +197,7 @@ def main():
                 print("\033[4;0H\033[K🔄 ニュースを更新中...", end="")
                 sys.stdout.flush()
 
-                news_cache = fetch_news()
+                news_cache = fetch_all_news()
                 current_index = 0
                 last_fetch_time = current_time
 
